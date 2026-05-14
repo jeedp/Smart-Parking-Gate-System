@@ -1,0 +1,17 @@
+{
+  "parking": {
+    "gate_status": "CLOSED",
+    "spaces_available": 8,
+    "total_entries": 56,
+    "total_exits": 48,
+    "last_card": "4A:3F:B2:1C",
+    "last_event": "ACCESS GRANTED"
+  },
+  "log": {
+    "entry_001": { "card": "4A:3F:B2:1C", "event": "GRANTED", "time": 1715000000 }
+  },
+  "authorized_cards": {
+    "4A3FB21C": "Student A",
+    "7B2A09EE": "Student B"
+  }
+}

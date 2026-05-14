@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+dashboard/node_modules/
+
+# Build output
+dashboard/dist/
+firmware/.pio/
+
+# IDE & OS
+.qodo/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Firebase
+.firebaserc.local
+firebase-debug.log
+
+# Environment
+.env
+.env.local

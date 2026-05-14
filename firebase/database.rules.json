@@ -1,0 +1,16 @@
+{
+  "rules": {
+    "parking": {
+      ".read":  true,
+      ".write": true
+    },
+    "log": {
+      ".read":  true,
+      ".write": true
+    },
+    "authorized_cards": {
+      ".read":  true,
+      ".write": false
+    }
+  }
+}

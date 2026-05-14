@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Parking Gate</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700&display=swap" />
+  <link rel="stylesheet" href="/src/styles/main.css" />
+</head>
+<body>
+  <div id="app">
+
+    <header>
+      <div class="header-left">
+        <div class="logo-mark">P</div>
+        <div>
+          <h1>Smart Parking Gate</h1>
+          <p class="subtitle">ESP32 · Firebase · BLE</p>
+        </div>
+      </div>
+      <div class="header-right">
+        <span class="pill" id="wifi-badge">● Connecting…</span>
+        <span class="pill pill-mono" id="ip-badge">—</span>
+      </div>
+    </header>
+
+    <main>
+      <!-- Stat cards -->
+      <section class="stats-row">
+        <div class="stat-card" id="card-spaces">
+          <span class="stat-label">Spaces available</span>
+          <span class="stat-value" id="val-spaces">—</span>
+          <span class="stat-sub" id="sub-spaces">of 12 total</span>
+        </div>
+        <div class="stat-card" id="card-entries">
+          <span class="stat-label">Total entries</span>
+          <span class="stat-value" id="val-entries">—</span>
+          <span class="stat-sub">today</span>
+        </div>
+        <div class="stat-card" id="card-exits">
+          <span class="stat-label">Total exits</span>
+          <span class="stat-value" id="val-exits">—</span>
+          <span class="stat-sub">today</span>
+        </div>
+        <div class="stat-card" id="card-gate">
+          <span class="stat-label">Gate status</span>
+          <span class="stat-value gate-val" id="val-gate">—</span>
+          <span class="stat-sub" id="sub-gate">—</span>
+        </div>
+      </section>
+
+      <!-- Chart + BLE -->
+      <section class="mid-row">
+        <div class="panel panel-chart">
+          <div class="panel-header">
+            <span>Vehicle count · last 24h</span>
+            <span class="occ-tag" id="occ-tag">—</span>
+          </div>
+          <div class="occ-bar"><div class="occ-fill" id="occ-fill"></div></div>
+          <canvas id="chart"></canvas>
+        </div>
+
+        <div class="panel panel-ble">
+          <div class="panel-header">Bluetooth control</div>
+          <div class="ble-status" id="ble-status">
+            <div class="ble-dot" id="ble-dot"></div>
+            <div>
+              <strong id="ble-name">Not connected</strong>
+              <small id="ble-info">Web Bluetooth</small>
+            </div>
+          </div>
+          <button class="btn btn-connect" id="btn-ble-connect">Connect via BLE</button>
+          <button class="btn btn-open"    id="btn-open"    disabled>Open gate</button>
+          <button class="btn btn-close"   id="btn-close"   disabled>Close gate</button>
+          <button class="btn btn-refresh" id="btn-refresh"  disabled>Refresh status</button>
+          <p class="ble-note">Requires Chrome on desktop or Android</p>
+        </div>
+      </section>
+
+      <!-- Log + RFID cards -->
+      <section class="bottom-row">
+        <div class="panel">
+          <div class="panel-header">Recent access log</div>
+          <ul class="log-list" id="log-list">
+            <li class="log-empty">Waiting for events…</li>
+          </ul>
+        </div>
+        <div class="panel">
+          <div class="panel-header">Registered cards</div>
+          <ul class="card-list" id="card-list">
+            <li class="card-item">
+              <span class="mono">4A:3F:B2:1C</span>
+              <span class="card-name">Unit 01</span>
+              <span class="badge-active">Active</span>
+            </li>
+            <li class="card-item">
+              <span class="mono">7B:2A:09:EE</span>
+              <span class="card-name">Unit 02</span>
+              <span class="badge-active">Active</span>
+            </li>
+            <li class="card-item">
+              <span class="mono">C3:88:5D:7A</span>
+              <span class="card-name">Instructor</span>
+              <span class="badge-active">Active</span>
+            </li>
+          </ul>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
