@@ -1,89 +1,115 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Welcome to Firebase Hosting</title>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Parking Gate</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700&display=swap" />
+  <link rel="stylesheet" href="/src/styles/main.css" />
+</head>
+<body>
+  <div id="app">
 
-    <!-- update the version number as needed -->
-    <script defer src="/__/firebase/12.13.0/firebase-app-compat.js"></script>
-    <!-- include only the Firebase features as you need -->
-    <script defer src="/__/firebase/12.13.0/firebase-auth-compat.js"></script>
-    <script defer src="/__/firebase/12.13.0/firebase-database-compat.js"></script>
-    <script defer src="/__/firebase/12.13.0/firebase-firestore-compat.js"></script>
-    <script defer src="/__/firebase/12.13.0/firebase-functions-compat.js"></script>
-    <script defer src="/__/firebase/12.13.0/firebase-messaging-compat.js"></script>
-    <script defer src="/__/firebase/12.13.0/firebase-storage-compat.js"></script>
-    <script defer src="/__/firebase/12.13.0/firebase-analytics-compat.js"></script>
-    <script defer src="/__/firebase/12.13.0/firebase-remote-config-compat.js"></script>
-    <script defer src="/__/firebase/12.13.0/firebase-performance-compat.js"></script>
-    <!-- 
-      initialize the SDK after all desired features are loaded, set useEmulator to false
-      to avoid connecting the SDK to running emulators.
-    -->
-    <script defer src="/__/firebase/init.js?useEmulator=true"></script>
+    <header>
+      <div class="header-left">
+        <div class="logo-mark">P</div>
+        <div>
+          <h1>Smart Parking Gate</h1>
+          <p class="subtitle">ESP32 · Firebase · BLE</p>
+        </div>
+      </div>
+      <div class="header-right">
+        <span class="pill" id="wifi-badge">● Connecting…</span>
+        <span class="pill pill-mono" id="ip-badge">—</span>
+      </div>
+    </header>
 
-    <style media="screen">
-      body { background: #ECEFF1; color: rgba(0,0,0,0.87); font-family: Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
-      #message { background: white; max-width: 360px; margin: 100px auto 16px; padding: 32px 24px; border-radius: 3px; }
-      #message h2 { color: #ffa100; font-weight: bold; font-size: 16px; margin: 0 0 8px; }
-      #message h1 { font-size: 22px; font-weight: 300; color: rgba(0,0,0,0.6); margin: 0 0 16px;}
-      #message p { line-height: 140%; margin: 16px 0 24px; font-size: 14px; }
-      #message a { display: block; text-align: center; background: #039be5; text-transform: uppercase; text-decoration: none; color: white; padding: 16px; border-radius: 4px; }
-      #message, #message a { box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); }
-      #load { color: rgba(0,0,0,0.4); text-align: center; font-size: 13px; }
-      @media (max-width: 600px) {
-        body, #message { margin-top: 0; background: white; box-shadow: none; }
-        body { border-top: 16px solid #ffa100; }
-      }
-    </style>
-  </head>
-  <body>
-    <div id="message">
-      <h2>Welcome</h2>
-      <h1>Firebase Hosting Setup Complete</h1>
-      <p>You're seeing this because you've successfully setup Firebase Hosting. Now it's time to go build something extraordinary!</p>
-      <a target="_blank" rel="noopener" href="https://firebase.google.com/docs/hosting/">Open Hosting Documentation</a>
-    </div>
-    <p id="load">Firebase SDK Loading&hellip;</p>
+    <main>
+      <!-- Stat cards -->
+      <section class="stats-row">
+        <div class="stat-card" id="card-spaces">
+          <span class="stat-label">Spaces available</span>
+          <span class="stat-value" id="val-spaces">—</span>
+          <span class="stat-sub" id="sub-spaces">of 12 total</span>
+        </div>
+        <div class="stat-card" id="card-entries">
+          <span class="stat-label">Total entries</span>
+          <span class="stat-value" id="val-entries">—</span>
+          <span class="stat-sub">today</span>
+        </div>
+        <div class="stat-card" id="card-exits">
+          <span class="stat-label">Total exits</span>
+          <span class="stat-value" id="val-exits">—</span>
+          <span class="stat-sub">today</span>
+        </div>
+        <div class="stat-card" id="card-gate">
+          <span class="stat-label">Gate status</span>
+          <span class="stat-value gate-val" id="val-gate">—</span>
+          <span class="stat-sub" id="sub-gate">—</span>
+        </div>
+      </section>
 
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        const loadEl = document.querySelector('#load');
-        // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
-        // // The Firebase SDK is initialized and available here!
-        //
-        // firebase.auth().onAuthStateChanged(user => { });
-        // firebase.database().ref('/path/to/ref').on('value', snapshot => { });
-        // firebase.firestore().doc('/foo/bar').get().then(() => { });
-        // firebase.functions().httpsCallable('yourFunction')().then(() => { });
-        // firebase.messaging().requestPermission().then(() => { });
-        // firebase.storage().ref('/path/to/ref').getDownloadURL().then(() => { });
-        // firebase.analytics(); // call to activate
-        // firebase.analytics().logEvent('tutorial_completed');
-        // firebase.performance(); // call to activate
-        //
-        // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+      <!-- Chart + BLE -->
+      <section class="mid-row">
+        <div class="panel panel-chart">
+          <div class="panel-header">
+            <span>Vehicle count · last 24h</span>
+            <span class="occ-tag" id="occ-tag">—</span>
+          </div>
+          <div class="occ-bar"><div class="occ-fill" id="occ-fill"></div></div>
+          <canvas id="chart"></canvas>
+        </div>
 
-        try {
-          let app = firebase.app();
-          let features = [
-            'auth', 
-            'database', 
-            'firestore',
-            'functions',
-            'messaging', 
-            'storage', 
-            'analytics', 
-            'remoteConfig',
-            'performance',
-          ].filter(feature => typeof app[feature] === 'function');
-          loadEl.textContent = `Firebase SDK loaded with ${features.join(', ')}`;
-        } catch (e) {
-          console.error(e);
-          loadEl.textContent = 'Error loading the Firebase SDK, check the console.';
-        }
-      });
-    </script>
-  </body>
+        <div class="panel panel-ble">
+          <div class="panel-header">Bluetooth control</div>
+          <div class="ble-status" id="ble-status">
+            <div class="ble-dot" id="ble-dot"></div>
+            <div>
+              <strong id="ble-name">Not connected</strong>
+              <small id="ble-info">Web Bluetooth</small>
+            </div>
+          </div>
+          <button class="btn btn-connect" id="btn-ble-connect">Connect via BLE</button>
+          <button class="btn btn-open"    id="btn-open"    disabled>Open gate</button>
+          <button class="btn btn-close"   id="btn-close"   disabled>Close gate</button>
+          <button class="btn btn-refresh" id="btn-refresh"  disabled>Refresh status</button>
+          <p class="ble-note">Requires Chrome on desktop or Android</p>
+        </div>
+      </section>
+
+      <!-- Log + RFID cards -->
+      <section class="bottom-row">
+        <div class="panel">
+          <div class="panel-header">Recent access log</div>
+          <ul class="log-list" id="log-list">
+            <li class="log-empty">Waiting for events…</li>
+          </ul>
+        </div>
+        <div class="panel">
+          <div class="panel-header">Registered cards</div>
+          <ul class="card-list" id="card-list">
+            <li class="card-item">
+              <span class="mono">4A:3F:B2:1C</span>
+              <span class="card-name">Unit 01</span>
+              <span class="badge-active">Active</span>
+            </li>
+            <li class="card-item">
+              <span class="mono">7B:2A:09:EE</span>
+              <span class="card-name">Unit 02</span>
+              <span class="badge-active">Active</span>
+            </li>
+            <li class="card-item">
+              <span class="mono">C3:88:5D:7A</span>
+              <span class="card-name">Instructor</span>
+              <span class="badge-active">Active</span>
+            </li>
+          </ul>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
 </html>

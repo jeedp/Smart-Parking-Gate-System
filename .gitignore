@@ -19,3 +19,9 @@ firebase-debug.log
 # Environment
 .env
 .env.local
+
+# AI tooling
+.agents/
+
+# idk yet
+skills-lock.json
