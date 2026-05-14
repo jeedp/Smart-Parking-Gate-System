@@ -3,13 +3,14 @@ import { getDatabase, ref, onValue, push } from 'firebase/database';
 
 // ── Replace these with your actual Firebase project config ────────────────────
 const firebaseConfig = {
-  apiKey:            "YOUR_API_KEY",
-  authDomain:        "your-project.firebaseapp.com",
-  databaseURL:       "https://your-project-default-rtdb.firebaseio.com",
-  projectId:         "your-project",
-  storageBucket:     "your-project.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId:             "YOUR_APP_ID",
+  apiKey: "AIzaSyANEm_QXOkhhC6JlH6YqkuUgUkcChr_qCQ",
+  authDomain: "smart-parking-gate-system.firebaseapp.com",
+  databaseURL: "https://smart-parking-gate-system-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "smart-parking-gate-system",
+  storageBucket: "smart-parking-gate-system.firebasestorage.app",
+  messagingSenderId: "878509472011",
+  appId: "1:878509472011:web:988b1f1afbca1327eb0a0e",
+  measurementId: "G-FLFGY2L51S"
 };
 
 const app = initializeApp(firebaseConfig);

@@ -1,12 +1,12 @@
 {
   "hosting": {
-    "public":  "dashboard/public",
+    "public":  "dashboard/dist",
     "ignore":  [
       "firebase.json", 
       "**/.*", 
       "**/node_modules/**"
     ],
-    "rewrites": [
+    "rewrites": [ 
       { 
         "source": "**", 
         "destination": "/index.html" 
