@@ -1,6 +1,6 @@
 #include "firebase_client.h"
 #include "config.h"
-#include <FirebaseESP32.h>
+#include <Firebase_ESP_Client.h>
 #include <WiFi.h>
 
 static FirebaseData   _fb_data;
@@ -31,7 +31,7 @@ void firebase_push(const ParkingState& s) {
     json.set("last_event",        s.last_event);
     json.set("updated_at/.sv",    "timestamp");   // Firebase server timestamp
 
-    if (!Firebase.updateNode(_fb_data, "/parking", json)) {
+    if (!Firebase.RTDB.updateNode(&_fb_data, "/parking", &json)) {
         Serial.printf("[FIREBASE] Push failed: %s\n", _fb_data.errorReason().c_str());
     }
 }
@@ -44,7 +44,7 @@ void firebase_log_event(const String& card_uid, const String& event) {
     entry.set("event",    event);
     entry.set("time/.sv", "timestamp");
 
-    if (!Firebase.pushJSON(_fb_data, "/log", entry)) {
+    if (!Firebase.RTDB.pushJSON(&_fb_data, "/log", &entry)) {
         Serial.printf("[FIREBASE] Log failed: %s\n", _fb_data.errorReason().c_str());
     }
 }
