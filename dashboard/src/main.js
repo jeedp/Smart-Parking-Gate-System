@@ -1,19 +1,19 @@
-import { subscribeParkingState, subscribeLog } from './firebase.js';
-import { initChart, recordDataPoint }          from './chart.js';
+import { subscribeParkingState, subscribeLog }           from './firebase.js';
+import { initChart, recordDataPoint }                    from './chart.js';
 import { updateStats, updateLog, setWifiBadge, setBleConnected } from './ui.js';
 import {
   isBleSupported, bleConnect,
-  bleOpenGate, bleCloseGate, bleRefreshStatus, bleIsConnected,
+  bleOpenGate, bleCloseGate, bleRefreshStatus,
 } from './ble.js';
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
 initChart('chart');
 setWifiBadge(false);
 
-// ── Firebase listeners ────────────────────────────────────────────────────────
+// ── Firebase real-time listeners ──────────────────────────────────────────────
 subscribeParkingState((data) => {
   updateStats(data);
-  recordDataPoint(12 - (data.spaces_available ?? 12));
+  recordDataPoint(MAX_CAPACITY - (data.spaces_available ?? MAX_CAPACITY));
   setWifiBadge(true);
 });
 
@@ -21,16 +21,19 @@ subscribeLog((entries) => {
   updateLog(entries);
 });
 
-// ── BLE setup ─────────────────────────────────────────────────────────────────
+// ── BLE ───────────────────────────────────────────────────────────────────────
+const MAX_CAPACITY = 12;
+
 if (!isBleSupported()) {
-  document.getElementById('btn-ble-connect').textContent = 'BLE not supported';
-  document.getElementById('btn-ble-connect').disabled    = true;
+  const btn = document.getElementById('btn-ble-connect');
+  btn.textContent = 'BLE not supported';
+  btn.disabled    = true;
 }
 
 document.getElementById('btn-ble-connect').addEventListener('click', async () => {
   try {
-    const name = await bleConnect((gateOpen, spaces) => {
-      // BLE status notification received — update UI instantly
+    const deviceName = await bleConnect((gateOpen, spaces) => {
+      // BLE notify received — update UI immediately without waiting for Firebase
       updateStats({
         gate_status:       gateOpen ? 'OPEN' : 'CLOSED',
         spaces_available:  spaces,
@@ -38,7 +41,7 @@ document.getElementById('btn-ble-connect').addEventListener('click', async () =>
         total_exits:       parseInt(document.getElementById('val-exits').textContent)   || 0,
       });
     });
-    setBleConnected(true, name);
+    setBleConnected(true, deviceName);
   } catch (err) {
     console.error('[BLE] Connect failed:', err);
     alert('BLE connection failed: ' + err.message);
