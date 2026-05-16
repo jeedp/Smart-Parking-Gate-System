@@ -1,7 +1,8 @@
 /* ── Reset & tokens ───────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-:root {
+/* original */
+/* :root {
   --bg:        #0d0f12;
   --surface:   #141720;
   --border:    rgba(255,255,255,.07);
@@ -11,6 +12,22 @@
   --accent-bg: rgba(200,240,74,.08);
   --danger:    #ff5c5c;
   --info:      #5badff;
+  --radius:    12px;
+  --mono:      'DM Mono', monospace;
+  --display:   'Syne', sans-serif;
+} */
+
+/* modified */
+:root {
+  --bg:        #f3f5f7;   /* light dashboard background */
+  --surface:   #ffffff;   /* white cards/panels */
+  --border:    #d6dde5;
+  --text:      #1f2d3d;   /* dark navy text */
+  --muted:     #6c7a89;
+  --accent:    #5dbb63;   /* green from "spaces available" */
+  --accent-bg: rgba(93,187,99,.12);
+  --danger:    #e74c3c;   /* red from closed button/status */
+  --info:      #3498db;   /* blue from app header/charts */
   --radius:    12px;
   --mono:      'DM Mono', monospace;
   --display:   'Syne', sans-serif;
