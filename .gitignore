@@ -28,3 +28,4 @@ skills-lock.json
 dist/
 .firebase/
 docs/project_plan.jpg
+firmware/include/config.h
