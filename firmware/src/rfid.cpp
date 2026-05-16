@@ -1,15 +1,15 @@
 #include "rfid.h"
 
-static MFRC522 mfrc522(PIN_RFID_SS, PIN_RFID_RST);
-
-const char* AUTHORIZED_UIDS[] = {
+// ─── Authorized card UIDs ─────────────────────────────────────────────────────
+// Add or remove UIDs here. Format: uppercase hex, no separators.
+static const char* AUTHORIZED_UIDS[] = {
     "4A3FB21C",
     "7B2A09EE",
     "C3885D7A",
 };
+static const uint8_t AUTHORIZED_COUNT = sizeof(AUTHORIZED_UIDS) / sizeof(AUTHORIZED_UIDS[0]);
 
-const uint8_t AUTHORIZED_COUNT =
-    sizeof(AUTHORIZED_UIDS) / sizeof(AUTHORIZED_UIDS[0]);
+static MFRC522 mfrc522(PIN_RFID_SS, PIN_RFID_RST);
 
 void rfid_init() {
     SPI.begin();
@@ -35,8 +35,9 @@ String rfid_read_uid() {
 }
 
 bool rfid_is_authorized(const String& uid) {
+    // uid is already uppercased by rfid_read_uid()
     for (uint8_t i = 0; i < AUTHORIZED_COUNT; i++) {
-        if (uid.equals(AUTHORIZED_UIDS[i])) return true;
+        if (uid == String(AUTHORIZED_UIDS[i])) return true;
     }
     return false;
 }
