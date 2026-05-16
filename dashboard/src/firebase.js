@@ -18,7 +18,7 @@ const db  = getDatabase(app);
 
 /**
  * Subscribe to /parking node.
- * callback(data) is called immediately and on every change.
+ * callback(data) fired immediately and on every ESP32 push.
  */
 export function subscribeParkingState(callback) {
   const parkingRef = ref(db, '/parking');
@@ -27,23 +27,7 @@ export function subscribeParkingState(callback) {
     if (data) callback(data);
   });
 }
-
-/**
- * Subscribe to /log node.
- * callback(entries[]) called with the last 20 log entries, newest first.
- */
-export function subscribeLog(callback) {
-  const logRef = ref(db, '/log');
-  onValue(logRef, (snapshot) => {
-    const raw = snapshot.val();
-    if (!raw) return;
-    const entries = Object.values(raw)
-      .sort((a, b) => b.time - a.time)
-      .slice(0, 20);
-    callback(entries);
-  });
-}
-
+ 
 /**
  * Subscribe to the last 20 log entries only.
  * callback(entries[]) called with newest-first sorted array.
@@ -59,4 +43,3 @@ export function subscribeLog(callback) {
     callback(entries);
   });
 }
- 
