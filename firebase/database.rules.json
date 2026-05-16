@@ -1,15 +1,15 @@
 {
   "rules": {
     "parking": {
-      ".read":  true,
-      ".write": true
+      ".read": "auth != null",
+      ".write": "auth != null"
     },
     "log": {
-      ".read":  true,
-      ".write": true
+      ".read": "auth != null",
+      ".write": "auth != null"
     },
     "authorized_cards": {
-      ".read":  true,
+      ".read": "auth != null",
       ".write": false
     }
   }
