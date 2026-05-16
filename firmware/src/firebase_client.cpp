@@ -11,8 +11,11 @@ static FirebaseAuth   _fb_auth;
 
 void firebase_init() {
     // v4+ config — legacy token goes in signer.tokens.legacy_token
-    _fb_config.database_url                  = "https://" FIREBASE_HOST;
-    _fb_config.signer.tokens.legacy_token    = FIREBASE_AUTH;
+    _fb_config.api_key      = API_KEY;
+    _fb_config.database_url = DATABASE_URL;
+
+    _fb_auth.user.email    = USER_EMAIL;
+    _fb_auth.user.password = USER_PASSWORD;
 
     // Required for token generation callbacks
     _fb_config.token_status_callback = tokenStatusCallback;

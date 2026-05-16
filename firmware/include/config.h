@@ -6,7 +6,7 @@
 
 // ─── Firebase ─────────────────────────────────────────────────────────────────
 #define API_KEY           "AIzaSyANEm_QXOkhhC6JlH6YqkuUgUkcChr_qCQ"
-#define DATABASE_URL      "https://smart-parking-gate-system-default-rtdb.asia-southeast1.firebasedatabase.app/"
+#define DATABASE_URL      "https://smart-parking-gate-system-default-rtdb.asia-southeast1.firebasedatabase.app"
 
 #define USER_EMAIL        "jedpadro@gmail.com"
 #define USER_PASSWORD     "jedpadro123"

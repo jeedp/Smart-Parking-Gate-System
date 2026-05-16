@@ -1,18 +1,34 @@
 #pragma once
 
 // ─── Wi-Fi ────────────────────────────────────────────────────────────────────
-#define WIFI_SSID        "YOUR_WIFI_SSID"
-#define WIFI_PASSWORD    "YOUR_WIFI_PASSWORD"
+#define WIFI_SSID        ""
+#define WIFI_PASSWORD    ""
 
 // ─── Firebase ─────────────────────────────────────────────────────────────────
-#define FIREBASE_HOST    "your-project-default-rtdb.firebaseio.com"
-#define FIREBASE_AUTH    "YOUR_FIREBASE_DATABASE_SECRET"
+#define API_KEY           ""
+#define DATABASE_URL      ""
+
+#define USER_EMAIL        ""
+#define USER_PASSWORD     ""
 
 // ─── Parking Settings ─────────────────────────────────────────────────────────
-#define MAX_CAPACITY     12       // Total parking spaces
-#define GATE_OPEN_MS     5000     // How long gate stays open (ms)
-#define IR_DEBOUNCE_MS   200      // IR sensor debounce window (ms)
-#define FIREBASE_PUSH_MS 2000     // How often to push data to Firebase (ms)
+#define MAX_CAPACITY         12
+
+// ─── Servo Angles ─────────────────────────────────────────────────────────────
+#define SERVO_GATE_OPEN      90    // Degrees — gate arm raised horizontal
+#define SERVO_GATE_CLOSED     0    // Degrees — gate arm down (blocking)
+
+// ─── Ultrasonic Settings ──────────────────────────────────────────────────────
+// Gate closes when ultrasonic reads a distance GREATER than this threshold —
+// meaning the car has fully cleared the sensor and driven past it
+#define ULTRASONIC_TRIGGER_CM   80    // Trigger threshold in centimeters
+#define ULTRASONIC_TIMEOUT_US   30000 // pulseIn timeout (30ms ≈ ~5m max range)
+
+// How long to wait for a car to clear the entry sensor before force-closing (ms)
+#define GATE_CLEAR_TIMEOUT_MS   15000
+
+// ─── Firebase push interval ───────────────────────────────────────────────────
+#define FIREBASE_PUSH_MS     2000
 
 // ─── BLE ──────────────────────────────────────────────────────────────────────
 #define BLE_DEVICE_NAME         "ParkingGate"
