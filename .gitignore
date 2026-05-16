@@ -14,7 +14,9 @@ Thumbs.db
 
 # Firebase
 .firebaserc.local
+.firebase/
 firebase-debug.log
+firebase/seed.json
 
 # Environment
 .env
@@ -26,6 +28,5 @@ firebase-debug.log
 # idk yet
 skills-lock.json
 dist/
-.firebase/
 docs/project_plan.jpg
 firmware/include/config.h
