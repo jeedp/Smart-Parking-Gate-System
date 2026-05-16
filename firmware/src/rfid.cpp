@@ -3,9 +3,8 @@
 // ─── Authorized card UIDs ─────────────────────────────────────────────────────
 // Add or remove UIDs here. Format: uppercase hex, no separators.
 static const char* AUTHORIZED_UIDS[] = {
-    "4A3FB21C",
-    "7B2A09EE",
-    "C3885D7A",
+    "6A2FB780",
+    "7BC6DC12",
 };
 static const uint8_t AUTHORIZED_COUNT = sizeof(AUTHORIZED_UIDS) / sizeof(AUTHORIZED_UIDS[0]);
 
