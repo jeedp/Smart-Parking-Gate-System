@@ -16,22 +16,7 @@
 // cols=16, rows=2
 static LiquidCrystal_I2C lcd(0x27, 16, 2);
 
-// ─── Custom LCD characters ────────────────────────────────────────────────────
-// Lock icon for denied events (shown on row 1 col 15)
-static byte CHAR_LOCK[8] = {
-    0b01110, 0b10001, 0b10001, 0b11111,
-    0b11011, 0b11011, 0b11111, 0b00000
-};
-// Checkmark for granted events
-static byte CHAR_CHECK[8] = {
-    0b00000, 0b00001, 0b00011, 0b10110,
-    0b11100, 0b01000, 0b00000, 0b00000
-};
-// Car icon for vehicle events
-static byte CHAR_CAR[8] = {
-    0b00000, 0b01110, 0b11111, 0b11111,
-    0b11111, 0b01010, 0b00000, 0b00000
-};
+
 
 // ─── Shared state (mutex-protected) ───────────────────────────────────────────
 static SemaphoreHandle_t state_mutex;
@@ -83,15 +68,14 @@ void lcd_show_idle(const ParkingState& s) {
 }
 
 void lcd_show_granted(const String& uid) {
-    // Row 0: "ACCESS GRANTED  " (+ checkmark char)
-    lcd.setCursor(0, 0); lcd.print(lcd_fit("ACCESS GRANTED", 15)); lcd.write(1); // checkmark
+    lcd_row(0, "ACCESS GRANTED  ");
     // Row 1: last 8 chars of UID formatted as pairs
     String short_uid = uid.length() >= 8 ? uid.substring(uid.length() - 8) : uid;
     lcd_row(1, "UID: " + short_uid);
 }
 
 void lcd_show_denied(const String& uid) {
-    lcd.setCursor(0, 0); lcd.print(lcd_fit("ACCESS DENIED", 15)); lcd.write(0);  // lock
+    lcd_row(0, "ACCESS DENIED   ");
     String short_uid = uid.length() >= 8 ? uid.substring(uid.length() - 8) : uid;
     lcd_row(1, "UID: " + short_uid);
 }
@@ -129,9 +113,6 @@ void task_gate_control(void*) {
     // LCD init
     lcd.init();
     lcd.backlight();
-    lcd.createChar(0, CHAR_LOCK);
-    lcd.createChar(1, CHAR_CHECK);
-    lcd.createChar(2, CHAR_CAR);
     lcd_show_startup();
     vTaskDelay(pdMS_TO_TICKS(1500));
 
