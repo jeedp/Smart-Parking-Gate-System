@@ -20,7 +20,7 @@ void gate_init() {
     _servo_exit.attach(PIN_SERVO_EXIT,   500, 2400);
 
     // Ensure both gates start closed
-    _servo_entry.write(SERVO_GATE_CLOSED);
+    _servo_entry.write(180);
     _servo_exit.write(SERVO_GATE_CLOSED);
 
     Serial.println("[GATE] Entry and exit servos ready — both closed");
@@ -45,7 +45,7 @@ void gate_close(GateId gate) {
     if (gate == GATE_ENTRY) {
         if (!_entry_open) return;
         Serial.println("[GATE] Entry gate CLOSING");
-        _servo_entry.write(SERVO_GATE_CLOSED);
+        _servo_entry.write(180);
         _entry_open = false;
     } else {
         if (!_exit_open) return;
