@@ -252,44 +252,43 @@ void task_gate_control(void*) {
             vTaskDelay(pdMS_TO_TICKS(1500));
         }
 
-        // ── 4. BLE commands ────────────────────────────────────────────────────
+                // ── 4. BLE commands ────────────────────────────────────────────────────
         BleCommand cmd = ble_get_command();
         if (cmd == BLE_OPEN) {
             buzzer_beep_manual();
             gate_open(GATE_ENTRY);
             gate_open(GATE_EXIT);
-            lcd_show_manual("BLE: OPEN       ");
-
+ 
             xSemaphoreTake(state_mutex, portMAX_DELAY);
             g_state.gate_open  = true;
             g_state.last_event = "BLE OPEN";
+            snap = g_state;
             xSemaphoreGive(state_mutex);
-
+ 
+            lcd_show_manual("BLE: OPEN       ");
+            // Immediately notify client of new status after open
+            ble_notify_status(snap.gate_open, snap.spaces_available);
             vTaskDelay(pdMS_TO_TICKS(1500));
+ 
         } else if (cmd == BLE_CLOSE) {
             gate_close(GATE_ENTRY);
             gate_close(GATE_EXIT);
-            lcd_show_manual("BLE: CLOSED     ");
-
+ 
             xSemaphoreTake(state_mutex, portMAX_DELAY);
             g_state.gate_open  = false;
             g_state.last_event = "BLE CLOSE";
+            snap = g_state;
             xSemaphoreGive(state_mutex);
-
+ 
+            lcd_show_manual("BLE: CLOSED     ");
+            // Immediately notify client of new status after close
+            ble_notify_status(snap.gate_open, snap.spaces_available);
             vTaskDelay(pdMS_TO_TICKS(1500));
-        } else if (cmd == BLE_REFRESH) {
-            Serial.println("[BLE] Refresh requested");
+ 
+        } else if (cmd == BLE_DISCONNECT) {
+            Serial.println("[BLE] Disconnect requested by client");
+            ble_disconnect_client();
         }
-
-        // ── 5. Idle screen + BLE notify ───────────────────────────────────────
-        xSemaphoreTake(state_mutex, portMAX_DELAY);
-        snap = g_state;
-        xSemaphoreGive(state_mutex);
-
-        lcd_show_idle(snap);
-        ble_notify_status(snap.gate_open, snap.spaces_available);
-
-        vTaskDelay(pdMS_TO_TICKS(100));
     }
 }
 
