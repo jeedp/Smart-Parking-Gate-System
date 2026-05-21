@@ -1,4 +1,4 @@
-const MAX_CAPACITY = 12;
+const MAX_CAPACITY = 6  ;
 
 /** Update the four stat cards from a ParkingState snapshot */
 export function updateStats(data) {
@@ -31,7 +31,6 @@ export function setWifiBadge(connected, ip = '') {
 }
 
 // ── Event display map ─────────────────────────────────────────────────────────
-// Maps every last_event value from firmware to { icon, label() }
 const EVENT_MAP = {
   'ENTRY GRANTED': { icon: '✅', label: (e) => `Card ${formatUID(e.card)} — entry granted` },
   'GRANTED':       { icon: '✅', label: (e) => `Card ${formatUID(e.card)} — entry granted` },
@@ -60,30 +59,33 @@ export function updateLog(entries) {
   list.innerHTML = entries.map(e => {
     const ev      = (e.event ?? '').toUpperCase();
     const mapping = EVENT_MAP[ev] ?? { icon: '⚙️', label: () => e.event ?? 'Unknown event' };
-    const icon    = mapping.icon;
     const label   = mapping.label(e);
     const time    = e.time ? new Date(e.time).toLocaleTimeString() : '';
     return `<li class="log-item">
-      <span class="log-icon">${icon}</span>
+      <span class="log-icon">${mapping.icon}</span>
       <span class="log-text">${label}</span>
       <span class="log-time">${time}</span>
     </li>`;
   }).join('');
 }
 
-/** Update BLE connection UI */
+/** Update BLE connection UI and enable/disable buttons accordingly */
 export function setBleConnected(connected, deviceName = '') {
   const dot  = document.getElementById('ble-dot');
   const name = document.getElementById('ble-name');
   const info = document.getElementById('ble-info');
+
   dot.className    = 'ble-dot' + (connected ? ' connected' : '');
   name.textContent = connected ? deviceName : 'Not connected';
   info.textContent = connected ? 'BLE active' : 'Web Bluetooth';
 
-  const disabled = !connected;
-  document.getElementById('btn-open').disabled    = disabled;
-  document.getElementById('btn-close').disabled   = disabled;
-  document.getElementById('btn-refresh').disabled = disabled;
+  // Gate control buttons — only active when connected
+  document.getElementById('btn-open').disabled       = !connected;
+  document.getElementById('btn-close').disabled      = !connected;
+  // Disconnect button — only active when connected
+  document.getElementById('btn-disconnect').disabled = !connected;
+  // Connect button — only active when NOT connected
+  document.getElementById('btn-ble-connect').disabled = connected;
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────

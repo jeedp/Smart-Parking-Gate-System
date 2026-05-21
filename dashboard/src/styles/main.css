@@ -133,6 +133,7 @@ canvas { width: 100% !important; max-height: 180px; }
 .btn-open    { border-color: var(--accent); color: var(--accent); }
 .btn-close   { border-color: var(--danger); color: var(--danger); }
 .btn-refresh { border-color: var(--border); color: var(--muted); }
+.btn-disconnect { border-color: #ff5c5c; color: #ff5c5c; }
 
 /* ── Bottom row ───────────────────────────────────────────────────────── */
 .bottom-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
