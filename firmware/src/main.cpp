@@ -11,12 +11,7 @@
 #include "ble_control.h"
 
 // ─── LCD 16x2 I2C ─────────────────────────────────────────────────────────────
-// First arg: I2C address (0x27 is standard PCF8574 backpack)
-// If display stays blank, try 0x3F instead
-// cols=16, rows=2
 static LiquidCrystal_I2C lcd(0x27, 16, 2);
-
-
 
 // ─── Shared state (mutex-protected) ───────────────────────────────────────────
 static SemaphoreHandle_t state_mutex;
@@ -36,8 +31,6 @@ void IRAM_ATTR isr_btn_open()  { btn_open_pressed  = true; }
 void IRAM_ATTR isr_btn_close() { btn_close_pressed = true; }
 
 // ─── LCD helpers ──────────────────────────────────────────────────────────────
-
-// Pad or truncate a string to exactly `width` characters
 static String lcd_fit(const String& s, uint8_t width = 16) {
     if (s.length() >= width) return s.substring(0, width);
     String out = s;
@@ -45,31 +38,21 @@ static String lcd_fit(const String& s, uint8_t width = 16) {
     return out;
 }
 
-// Print a full row — always writes all 16 chars to prevent ghost characters
 static void lcd_row(uint8_t row, const String& text) {
     lcd.setCursor(0, row);
     lcd.print(lcd_fit(text, 16));
 }
 
 // ─── LCD screen states ────────────────────────────────────────────────────────
-// The 16x2 LCD can only show 2 lines at a time.
-// We split the display into logical screens and show the most relevant one.
-
 void lcd_show_idle(const ParkingState& s) {
-    // Row 0: "Free: 3/6  OPEN" or "Free: 3/6 CLOSE"
-    String gate_tag = gate_is_open(GATE_ENTRY) || gate_is_open(GATE_EXIT) ? " OPEN " : "CLOSED";
     String row0 = "PARK AVAIL: " + String(s.spaces_available) + "/" + String(MAX_CAPACITY);
-    // Row 1: "In:OPEN  Out:CLOSED"
-    String in_s  = gate_is_open(GATE_ENTRY) ? "OPEN " : "CLOSED ";
-    String out_s = gate_is_open(GATE_EXIT)  ? "OPEN " : "CLOSED ";
-    String row1  = " Gate: " + in_s; // + "Out:" + out_s;
+    String in_s = gate_is_open(GATE_ENTRY) ? "OPEN " : "CLOSED ";
     lcd_row(0, row0);
-    lcd_row(1, row1);
+    lcd_row(1, " Gate: " + in_s);
 }
 
 void lcd_show_granted(const String& uid) {
     lcd_row(0, "ACCESS GRANTED  ");
-    // Row 1: last 8 chars of UID formatted as pairs
     String short_uid = uid.length() >= 8 ? uid.substring(uid.length() - 8) : uid;
     lcd_row(1, "UID: " + short_uid);
 }
@@ -81,13 +64,13 @@ void lcd_show_denied(const String& uid) {
 }
 
 void lcd_show_vehicle_event(const String& msg, int spaces) {
-    lcd_row(0, msg);                                              // e.g. "VEHICLE ENTERED "
+    lcd_row(0, msg);
     lcd_row(1, "Free: " + String(spaces) + "/" + String(MAX_CAPACITY) + " spaces");
 }
 
 void lcd_show_manual(const String& action) {
     lcd_row(0, "MANUAL OVERRIDE ");
-    lcd_row(1, action);                                           // e.g. "Gate: OPEN      "
+    lcd_row(1, action);
 }
 
 void lcd_show_startup() {
@@ -102,7 +85,6 @@ void lcd_show_wifi_connecting() {
 
 void lcd_show_wifi_ready(const String& ip) {
     lcd_row(0, "WiFi connected! ");
-    // Show last 16 chars of IP if long (typically fits fine)
     lcd_row(1, ip.length() > 16 ? ip.substring(ip.length() - 16) : ip);
 }
 
@@ -110,7 +92,6 @@ void lcd_show_wifi_ready(const String& ip) {
 void task_gate_control(void*) {
     Serial.println("[TASK] GateControlTask on core " + String(xPortGetCoreID()));
 
-    // LCD init
     lcd.init();
     lcd.backlight();
     lcd_show_startup();
@@ -122,7 +103,6 @@ void task_gate_control(void*) {
     buzzer_init();
     ble_init();
 
-    // Show idle screen after init
     xSemaphoreTake(state_mutex, portMAX_DELAY);
     ParkingState snap = g_state;
     xSemaphoreGive(state_mutex);
@@ -154,7 +134,6 @@ void task_gate_control(void*) {
 
                 firebase_log_event(uid, "GRANTED");
 
-                // Wait for car to appear under entry ultrasonic
                 Serial.println("[ENTRY] Waiting for car...");
                 uint32_t t0 = millis();
                 while (!ultrasonic_car_present(SENSOR_ENTRY)) {
@@ -165,7 +144,6 @@ void task_gate_control(void*) {
                     vTaskDelay(pdMS_TO_TICKS(100));
                 }
 
-                // Wait for car to fully clear before closing
                 lcd_row(0, "Wait: car clear ");
                 lcd_row(1, "Gate stays open ");
                 bool cleared = ultrasonic_wait_car_clear(SENSOR_ENTRY, GATE_CLEAR_TIMEOUT_MS);
@@ -180,7 +158,7 @@ void task_gate_control(void*) {
                 xSemaphoreGive(state_mutex);
 
                 lcd_show_vehicle_event("VEHICLE ENTERED ", snap.spaces_available);
-                vTaskDelay(pdMS_TO_TICKS(2000));   // Show message 2s then return to idle
+                vTaskDelay(pdMS_TO_TICKS(2000));
 
             } else {
                 buzzer_beep_denied();
@@ -192,11 +170,11 @@ void task_gate_control(void*) {
                 xSemaphoreGive(state_mutex);
 
                 firebase_log_event(uid, "DENIED");
-                vTaskDelay(pdMS_TO_TICKS(2000));   // Show denied message 2s
+                vTaskDelay(pdMS_TO_TICKS(2000));
             }
         }
 
-        // ── 2. Exit ultrasonic ─────────────────
+        // ── 2. Exit ultrasonic ─────────────────────────────────────────────────
         if (!gate_is_open(GATE_EXIT) && ultrasonic_car_present(SENSOR_EXIT)) {
             Serial.println("[EXIT] Car exiting parking lot");
             buzzer_beep_granted();
@@ -258,33 +236,31 @@ void task_gate_control(void*) {
             buzzer_beep_manual();
             gate_open(GATE_ENTRY);
             gate_open(GATE_EXIT);
- 
+
             xSemaphoreTake(state_mutex, portMAX_DELAY);
             g_state.gate_open  = true;
             g_state.last_event = "BLE OPEN";
             snap = g_state;
             xSemaphoreGive(state_mutex);
- 
+
             lcd_show_manual("BLE: OPEN       ");
-            // Immediately notify client of new status after open
             ble_notify_status(snap.gate_open, snap.spaces_available);
             vTaskDelay(pdMS_TO_TICKS(1500));
- 
+
         } else if (cmd == BLE_CLOSE) {
             gate_close(GATE_ENTRY);
             gate_close(GATE_EXIT);
- 
+
             xSemaphoreTake(state_mutex, portMAX_DELAY);
             g_state.gate_open  = false;
             g_state.last_event = "BLE CLOSE";
             snap = g_state;
             xSemaphoreGive(state_mutex);
- 
+
             lcd_show_manual("BLE: CLOSED     ");
-            // Immediately notify client of new status after close
             ble_notify_status(snap.gate_open, snap.spaces_available);
             vTaskDelay(pdMS_TO_TICKS(1500));
- 
+
         } else if (cmd == BLE_DISCONNECT) {
             Serial.println("[BLE] Disconnect requested by client");
             ble_disconnect_client();
@@ -309,7 +285,6 @@ void task_dashboard(void*) {
     WiFi.mode(WIFI_STA);
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
-    // Show connecting on LCD via shared bus — use a brief critical section
     xSemaphoreTake(state_mutex, portMAX_DELAY);
     lcd_show_wifi_connecting();
     xSemaphoreGive(state_mutex);
@@ -328,14 +303,15 @@ void task_dashboard(void*) {
         xSemaphoreTake(state_mutex, portMAX_DELAY);
         lcd_show_wifi_ready(ip);
         xSemaphoreGive(state_mutex);
-        vTaskDelay(pdMS_TO_TICKS(2000));   // Show IP for 2s
+        vTaskDelay(pdMS_TO_TICKS(2000));
     } else {
         Serial.println("\n[WIFI] Failed — dashboard offline");
     }
 
-    firebase_init();
+    firebase_init();   // Blocks until Firebase.ready() — no more premature pushes
 
-    TickType_t last_push = xTaskGetTickCount();
+    TickType_t last_push    = xTaskGetTickCount();
+    uint8_t    fail_streak  = 0;  // Track consecutive push failures for backoff
 
     for (;;) {
         if (xTaskGetTickCount() - last_push >= pdMS_TO_TICKS(FIREBASE_PUSH_MS)) {
@@ -344,9 +320,21 @@ void task_dashboard(void*) {
             if (WiFi.status() != WL_CONNECTED) {
                 Serial.println("[WIFI] Lost connection — reconnecting");
                 WiFi.reconnect();
-                vTaskDelay(pdMS_TO_TICKS(3000));
+                // Back off 5s on Wi-Fi loss — don't hammer reconnect
+                vTaskDelay(pdMS_TO_TICKS(5000));
                 continue;
             }
+
+            if (!firebase_connected()) {
+                fail_streak++;
+                // Exponential-ish backoff: 2s, 4s, 8s, cap at 30s
+                uint32_t wait_ms = min((uint32_t)(2000 * fail_streak), (uint32_t)30000);
+                Serial.printf("[FIREBASE] Not ready — waiting %ums before retry\n", wait_ms);
+                vTaskDelay(pdMS_TO_TICKS(wait_ms));
+                continue;
+            }
+
+            fail_streak = 0;  // Reset on successful connection check
 
             xSemaphoreTake(state_mutex, portMAX_DELAY);
             ParkingState snap = g_state;
@@ -370,8 +358,10 @@ void setup() {
     state_mutex = xSemaphoreCreateMutex();
     configASSERT(state_mutex);
 
-    xTaskCreatePinnedToCore(task_gate_control, "GateControl", 8192, nullptr, 5, nullptr, 0);
-    xTaskCreatePinnedToCore(task_dashboard,    "Dashboard",   8192, nullptr, 3, nullptr, 1);
+    xTaskCreatePinnedToCore(task_gate_control, "GateControl", 8192,  nullptr, 5, nullptr, 0);
+    // Stack increased from 8192 → 16384: Firebase SSL/TLS needs significantly
+    // more stack than plain HTTP. 8192 caused the stack canary crash.
+    xTaskCreatePinnedToCore(task_dashboard,    "Dashboard",   16384, nullptr, 3, nullptr, 1);
 }
 
 void loop() { vTaskDelay(pdMS_TO_TICKS(1000)); }
