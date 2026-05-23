@@ -24,8 +24,8 @@ void firebase_init() {
     Firebase.reconnectNetwork(true);
 
     // Stream buffer size — enough for our small JSON payloads
-    _fb_data.setBSSLBufferSize(4096, 1024);
-    _fb_data.setResponseSize(2048);
+    _fb_data.setBSSLBufferSize(8129, 1024);
+    _fb_data.setResponseSize(4096);
 
     Serial.println("[FIREBASE] Init done");
 }
