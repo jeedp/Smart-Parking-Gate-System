@@ -56,13 +56,13 @@ static void lcd_row(uint8_t row, const String& text) {
 // We split the display into logical screens and show the most relevant one.
 
 void lcd_show_idle(const ParkingState& s) {
-    // Row 0: "Free: 8/12  OPEN" or "Free: 8/12 CLOSE"
+    // Row 0: "Free: 3/6  OPEN" or "Free: 3/6 CLOSE"
     String gate_tag = gate_is_open(GATE_ENTRY) || gate_is_open(GATE_EXIT) ? " OPEN " : "CLOSED";
-    String row0 = "Free:" + String(s.spaces_available) + "/" + String(MAX_CAPACITY) + " " + gate_tag;
-    // Row 1: "In:OPEN  Out:CLSD"
-    String in_s  = gate_is_open(GATE_ENTRY) ? "OPN " : "CLS ";
-    String out_s = gate_is_open(GATE_EXIT)  ? "OPN " : "CLS ";
-    String row1  = "In:" + in_s + "Out:" + out_s;
+    String row0 = "PARK AVAIL: " + String(s.spaces_available) + "/" + String(MAX_CAPACITY);
+    // Row 1: "In:OPEN  Out:CLOSED"
+    String in_s  = gate_is_open(GATE_ENTRY) ? "OPEN " : "CLOSED ";
+    String out_s = gate_is_open(GATE_EXIT)  ? "OPEN " : "CLOSED ";
+    String row1  = " Gate: " + in_s; // + "Out:" + out_s;
     lcd_row(0, row0);
     lcd_row(1, row1);
 }
@@ -91,7 +91,7 @@ void lcd_show_manual(const String& action) {
 }
 
 void lcd_show_startup() {
-    lcd_row(0, "SMART PARKING   ");
+    lcd_row(0, " SMART PARKING  ");
     lcd_row(1, "  GATE SYSTEM   ");
 }
 
@@ -196,14 +196,14 @@ void task_gate_control(void*) {
             }
         }
 
-        // ── 2. Exit ultrasonic → exit gate opens automatically ─────────────────
+        // ── 2. Exit ultrasonic ─────────────────
         if (!gate_is_open(GATE_EXIT) && ultrasonic_car_present(SENSOR_EXIT)) {
-            Serial.println("[EXIT] Car approaching — opening exit gate");
+            Serial.println("[EXIT] Car exiting parking lot");
             buzzer_beep_granted();
             gate_open(GATE_EXIT);
 
-            lcd_row(0, "EXIT GATE OPEN  ");
-            lcd_row(1, "Car exiting...  ");
+            lcd_row(0, "  CAR EXITING   ");
+            lcd_row(1, "  PARKING LOT   ");
 
             xSemaphoreTake(state_mutex, portMAX_DELAY);
             g_state.last_event = "EXIT DETECT";
@@ -252,7 +252,7 @@ void task_gate_control(void*) {
             vTaskDelay(pdMS_TO_TICKS(1500));
         }
 
-                // ── 4. BLE commands ────────────────────────────────────────────────────
+        // ── 4. BLE commands ────────────────────────────────────────────────────
         BleCommand cmd = ble_get_command();
         if (cmd == BLE_OPEN) {
             buzzer_beep_manual();
@@ -289,6 +289,16 @@ void task_gate_control(void*) {
             Serial.println("[BLE] Disconnect requested by client");
             ble_disconnect_client();
         }
+
+        // ── 5. Idle screen + BLE notify ───────────────────────────────────────
+        xSemaphoreTake(state_mutex, portMAX_DELAY);
+        snap = g_state;
+        xSemaphoreGive(state_mutex);
+
+        lcd_show_idle(snap);
+        ble_notify_status(snap.gate_open, snap.spaces_available);
+
+        vTaskDelay(pdMS_TO_TICKS(100));
     }
 }
 
