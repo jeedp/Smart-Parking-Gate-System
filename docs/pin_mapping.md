@@ -1,4 +1,4 @@
-# ESP32 Pin Mapping — v2 (Servo + Ultrasonic)
+# ESP32 Pin Mapping — v2 (Servo + Ultrasonic + LCD)
 
 ## RFID RC522 (SPI)
 | RC522 Pin | ESP32 GPIO | Notes                    |
@@ -7,7 +7,7 @@
 | SCK       | 18         | SPI default              |
 | MOSI      | 23         | SPI default              |
 | MISO      | 19         | SPI default              |
-| RST       | 22         | Shared with OLED SCL*    |
+| RST       | 4          | Moved from GPIO22 to free it for the LCD's I2C clock |
 | VCC       | 3.3V       | NOT 5V                   |
 | GND       | GND        |                          |
 
@@ -31,16 +31,15 @@
 > Entry flow: RFID opens gate → car passes → ultrasonic detects clear → gate closes.
 > Exit flow: car approaches exit sensor → gate opens automatically → car clears → gate closes.
 
-## OLED Display SSD1306 0.96" (I2C)
-| OLED Pin | ESP32 GPIO | Notes                  |
-|----------|------------|------------------------|
-| SDA      | 21         |                        |
-| SCL      | 22         | Shared with RFID RST*  |
-| VCC      | 3.3V       |                        |
-| GND      | GND        |                        |
+## LCD 16x2 with I2C backpack (PCF8574)
+| LCD Pin | ESP32 GPIO | Notes                          |
+|---------|------------|--------------------------------|
+| SDA     | 21         | ESP32 I2C default              |
+| SCL     | 22         | ESP32 I2C default              |
+| VCC     | 5V         | Most PCF8574 backpacks run on 5V |
+| GND     | GND        |                                |
 
-> *GPIO22 shared: hold RFID RST HIGH after rfid_init() so it acts as a
-> passive pin and does not interfere with I2C clock.
+> I2C address 0x27 (set in `main.cpp`). If the screen stays blank, try 0x3F.
 
 ## Buzzer
 | Pin | ESP32 GPIO |
@@ -54,10 +53,14 @@
 | OPEN   | 34         | INPUT_PULLUP, FALLING ISR  |
 | CLOSE  | 35         | INPUT_PULLUP, FALLING ISR  |
 
+> ⚠️ GPIO34–39 are input-only and have **no internal pull-up resistors**, so
+> `INPUT_PULLUP` has no effect on these pins. Wire an external pull-up
+> (e.g. 10 kΩ to 3.3V) on each button, or the inputs can float and trigger on their own.
+
 ## Power Rails
 | Rail | Powers                                  |
 |------|-----------------------------------------|
-| 5V   | Servo motors, HC-SR04 sensors, OLED     |
+| 5V   | Servo motors, HC-SR04 sensors, LCD      |
 | 3.3V | RFID RC522                              |
 | USB  | ESP32 (development) or dedicated 5V reg |
 
@@ -67,3 +70,4 @@
 | Gear Motor    | Replaced by servo — no driver needed             |
 | L298N Driver  | No longer needed — servo drives directly         |
 | IR Sensor x2  | Replaced by HC-SR04 ultrasonic — distance-based  |
+| OLED SSD1306  | Replaced by a 16x2 I2C LCD                       |
